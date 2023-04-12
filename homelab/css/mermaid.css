@@ -1,0 +1,8 @@
+.mermaid text {
+    font-size: 15px !important;
+}
+
+/* .task [fill="lightgrey"]{ */
+.mermaid .task:not(.active1) {
+    fill: #2c2c2c !important;
+}
