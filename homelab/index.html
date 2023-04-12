@@ -89,10 +89,6 @@
       <div class="slides"><section ><section data-markdown><script type="text/template"><!-- .slide: class="drop" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-<img src="Pasted image 20230402083737.png" alt="" style="object-fit: scale-down">
-
-
-
 <div class="mermaid">
 <!-- .element: style="width: 99%; height: auto" -->
 gantt
@@ -117,10 +113,12 @@ gantt
     Ziti remote access to Rancher                :          ziti, after migrate, 2d
     
     section Storage Provisioning
-    S3 storageclass and provisioner for backups  :          storage, after ziti, 1d
+    S3 storageclass and provisioner for backups  :          storage1, after ziti, 1d
+    
+    Harvester custom storageclass(es) for pods:          storage2, after storage1, 1d
     
     section Git and GitOps
-    Git w/ Gitea                                 :          git, after storage, 1d
+    Git w/ Gitea                                 :          git, after storage2, 1d
     GitOps w/ Argo                               :          gitops, after git, 2d
     
     section Metrics
@@ -131,7 +129,7 @@ gantt
 </div>
 
 <aside class="notes"><p>speaker&#39;s note</p>
-</aside></script></section><section data-markdown><script type="text/template"><!-- .slide: class="drop" data-background-image="images/ziggy/ZiggyUndertheWeather.svg" -->
+</aside></script></section><section data-markdown><script type="text/template"><!-- .slide: class="drop" data-background-image="homelab/Ziggy Takes a Picture.svg" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
 # 🦈️
