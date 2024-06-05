@@ -1,0 +1,13 @@
+.mermaid text {
+    font-size: 15px !important;
+}
+
+/* .task [fill="lightgrey"]{ */
+.mermaid .task:not(.active1) {
+    fill: #2c2c2c !important;
+}
+
+/* .reveal blockquote { width: 10% } */
+/* body > div.reveal.concave.center.focused.has-horizontal-slides.ready > div.slides > section.drop.present > div > pre > code {
+    width: 50% !important;
+} */

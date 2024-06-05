@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title></title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="css/mattropolis.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+    <link rel="stylesheet" href="css/mermaid.css" />
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Patch || Proxy
+
+*the ins and outs of fortified tunneling*
+</div>
+
+<aside class="notes"><ul>
+<li>Objectives<ul>
+<li>overview of tunneling methods with a focus on self-hosting</li>
+</ul>
+</li>
+<li>Outline<ul>
+<li>motivations, values</li>
+<li>techniques</li>
+<li>case studies</li>
+</ul>
+</li>
+<li>Surveys?</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Hello 
+
+👋<!-- .element: class="emoji" -->
+
+**Kenneth Bingham**
+
+w@qrk.us | *@qrkourier*
+
+<style>
+.emoji {
+  font-size: 50px;
+  display: inline-block;
+  animation: rotate 9s infinite ease-in-out;
+}
+
+@keyframes rotate {
+      0% {
+        transform: rotate(10deg);
+      }
+      25% {
+        transform: rotate(25deg);
+      }
+      50% {
+        transform: rotate(0deg);
+      }
+      75% {
+        transform: rotate(-10deg);
+      }
+      100% {
+        transform: rotate(10deg);
+      }
+}
+</style>
+</div>
+
+<aside class="notes"><ul>
+<li>Day job is working on the OpenZiti community open-source project. Development is sponsored and led by NetFoundry Cloud</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" data-background-image="./patch-v-proxy/assets/mr-rabbit.png" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## How has Tunneling Changed?
+
+*network-centric v. app-centric*
+
+<div class="has-dark-background" style="background-color: black; opacity: 50%; position: absolute; left: 1%; top: 66%; height: 33%; width: 33%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+<!-- .element: class="grid" -->
+
+**VPN**
+
+public gateway to a private subnet or exit node
+
+</div>
+
+<div class="has-dark-background" style="background-color: black; padding: 8; box-sizing: border-box; opacity: 50%; position: absolute; left: 66%; top: 1%; height: 33%; width: 33%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+
+
+**Tunnel**
+
+A public broker or relay for a private application
+
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>for self-hosters, it&#39;s often less about building and bridging infrastructure and more about securing individual apps</li>
+<li>vpns for full-tunnel exit node, split-tunnel corporate network</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" data-background-image="patch-v-proxy/assets/hand-wrench.png" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="has-light-background" style="background-color: lightblue; opacity: 70%; position: absolute; left: 6%; top: 0%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+
+
+### Access my own stuff
+
+</div>
+
+<div class="has-light-background" style="background-color: lightblue; opacity: 60%; position: absolute; left: 6%; top: 33.5%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+
+
+## Uses
+
+</div>
+
+<div class="has-light-background" style="background-color: lightblue; opacity: 70%; position: absolute; left: 6%; top: 67%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+
+
+### Share my stuff with ppl
+
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>Motivations to talk about tunneling<ul>
+<li>ultimately: how do I<ul>
+<li>access the galaxy of free software through self-hosting?</li>
+<li>apply values like privacy and self-sufficiency</li>
+</ul>
+</li>
+<li>tunneling can be a confusing means to an end<ul>
+<li>many tunneling projects and products</li>
+</ul>
+</li>
+<li>public good - Can we decentralize important services to make them more resilient or less adversarial (surveillance driven)?</li>
+</ul>
+</li>
+<li>Access my stuff from wherever<ul>
+<li>examples<ul>
+<li>remote admin SSH</li>
+<li>private Git repo</li>
+<li>Home Assistant</li>
+<li>offline AI models</li>
+<li>catch webhooks for integrations</li>
+</ul>
+</li>
+<li>always available to me</li>
+<li>admin everywhere</li>
+<li>simple enough for me to remember how it works</li>
+<li>dedicated capacity - few performance concerns</li>
+</ul>
+</li>
+<li>Share my stuff<ul>
+<li>examples<ul>
+<li>send a big file(s)</li>
+<li>Jitsi conference </li>
+<li>play Minecraft</li>
+</ul>
+</li>
+<li>also simple enough for my users to remember how it works </li>
+<li>temporary availability is a compelling counterpoint to authN and authZ</li>
+</ul>
+</li>
+<li>Inviting others<ul>
+<li>more expensive resources, QoS, or try again later...</li>
+<li>segmenting access is more complicated with authN and authZ v. admin everywhere</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" data-background-image="patch-v-proxy/assets/toothbrush.png" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Production <!-- .element: id="heading" -->
+
+<div class="has-light-background" style="background-color: beige; opacity: 70%; position: absolute; left: 6%; top: 67%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+
+
+<div class="block">
+
+<!-- .element: id="block" -->
+
+> There are as many definitions as there are toothbrushes in the known universe.<!-- .element: id="quote" -->
+
+</div>
+
+
+
+</div>
+
+<style>
+	#heading{
+		opacity: 80%;
+		padding: 0.6em;
+		font-size: 3em;
+		background-color: beige;
+		color: black;
+	}
+	#block{
+		font-size: 33px;
+		border-style: none;
+	}
+	#quote{
+	}
+</style>
+</div>
+
+<aside class="notes"><ol>
+<li>&quot;production&quot; is another way of saying &quot;secure enough&quot;</li>
+<li>incremental security or begin with a more foundationally secure approach
+(instantly available for more useful, important things)<ol>
+<li>start with permissive, eventually do a lot of work to create yet another permissive tunnel because it&#39;s challenging to qualify flows after they&#39;re in place</li>
+<li>start with restrictive and build meaningful policies for labeled entities as you go</li>
+</ol>
+</li>
+</ol>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" data-background-image="./patch-v-proxy/assets/plumbing.png" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="has-light-background" style="background-color: silver; padding: 0; box-sizing: border-box; opacity: 0.8; position: absolute; left: 33.5%; top: 33.5%; height: 33%; width: 33%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+
+## The Plumbing 
+
+</div>
+
+<div class="block">
+
+<!-- .element: class="fragment fade-in" -->
+
+<div class="has-light-background" style="background-color: silver; padding: 0; box-sizing: border-box; opacity: 0.8; position: absolute; left: 33.5%; top: 0%; height: 33%; width: 33%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+### Provisioning
+
+central v. distributed
+
+</div>
+
+</div>
+
+
+
+<div class="block">
+
+<!-- .element: class="fragment fade-in" -->
+
+<div class="has-light-background" style="background-color: silver; padding: 0; box-sizing: border-box; opacity: 0.8; position: absolute; left: 33.5%; top: 67%; height: 33%; width: 33%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+### Data
+
+broker v. relay
+
+transparent v. proxy
+
+</div>
+
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>provisioning<ul>
+<li>central config, obedient daemons</li>
+<li>agent-initiated (publish my file or socket)</li>
+</ul>
+</li>
+<li>data<ul>
+<li>NAT-T broker facilitates direct P2P transport<ul>
+<li>service providers paying for bandwidth</li>
+<li>ultra latency sensitive apps</li>
+</ul>
+</li>
+<li>3p relay ideally has zero access to data</li>
+<li>transport<ul>
+<li>TCP</li>
+<li>UDP+flow control protocol</li>
+</ul>
+</li>
+<li>proxy<ul>
+<li>transparent w/ DNS (TPROXY v. ip route)</li>
+<li>CONNECT, SOCKS, socket</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 25%; top: 0%; height: 50%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+## OpenSSH Reverse Tunnel
+
+</div>
+<div class="" style="position: absolute; left: 0%; top: NaN%; height: undefined%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+```ssh
+# public host sshd_config
+GatewayPorts clientspecified
+```
+
+```bash
+# server tunnel via public host
+$ ssh -nNv \
+    -R '*:8080:web.homelab.internal:80' \
+    user@exit.example.com
+```
+
+```bash
+# generic client GET web.homelab.internal:80
+# by public DNS name
+$ curl http://exit.example.com:8080
+```
+
+</div>
+<div class="" style="position: absolute; left: 50%; top: NaN%; height: undefined%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+
+<div class="mermaid">
+graph TD
+    A[Generic Client] -->|no tunnel| B[exit.example.com:22,8080]
+    C[web.homelab.internal:80] -->|tunnel| B
+
+</div>
+
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>pros<ul>
+<li>permissionless, generic client access</li>
+<li>only SSH server is exposed</li>
+<li>this is the closest to modern tunneling with SSH</li>
+</ul>
+</li>
+<li>cons<ul>
+<li>no retry without glue</li>
+<li>tedious incantation</li>
+<li>intricate alignment of keys, addresses, and ports</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 25%; top: 0%; height: 50%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+## OpenSSH Port Forward
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: NaN%; height: undefined%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+```bash
+# client tunnel
+$ ssh -nNv \
+    -L '127.80.80.0:8080:web.homelab.internal:80' \
+	user@exit.example.com
+```
+
+```bash
+# same device can GET web.homelab.internal:80 
+#  by forward IP:port
+$ curl http://127.80.80.0:8080
+```
+</div>
+
+<div class="" style="position: absolute; left: 50%; top: NaN%; height: undefined%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+
+<div class="mermaid">
+graph TD
+    A[Tunnel Client] -->|tunnel| B[exit.example.com:22]
+    B -->|no tunnel| C[web.homelab.internal:80]
+
+</div>
+
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>my first tunnel?</li>
+<li>pros:<ul>
+<li>immediate, simple</li>
+</ul>
+</li>
+<li>cons<ul>
+<li>no client side DNS</li>
+<li>no retry without glue</li>
+<li>tedious incantation for each forward</li>
+<li>intricate alignment of keys, addresses, and ports</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 25%; top: 0%; height: 50%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+## OpenSSH Dynamic Proxy
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: NaN%; height: undefined%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+```bash
+# client tunnel
+ssh -nNvD 1080 user@exit.example.com
+```
+
+```bash
+# GET web.homelab.internal:80
+$ tsocks curl http://web.homelab.internal
+```
+</div>
+<div class="" style="position: absolute; left: 50%; top: NaN%; height: undefined%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+
+<div class="mermaid">
+graph TD
+    A[Tunnel Client] -->|tunnel| B[exit.example.com:22]
+    B -->|no tunnel| C[web.homelab.internal:80]
+
+</div>
+
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>example of direct, privilged access with bespoke client software</li>
+<li>pros:<ul>
+<li>SOCKS5 can forward DNS queries</li>
+</ul>
+</li>
+<li>cons<ul>
+<li>22/tcp is often blocked at egress</li>
+<li>22/tcp must be published to the internet</li>
+<li>clients must be SOCKS aware</li>
+<li>wrappers leverage LD_PRELOAD</li>
+<li>intricate preconfiguration of pubkeys on each client</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 25%; top: 0%; height: 50%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+## Wireguard VPN
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: NaN%; height: undefined%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+```bash
+# invent an address
+ip address add dev wg0 10.0.0.1/24
+
+# mutually authorized peers
+wg set wg0 \
+  listen-port 4321 \
+  private-key /etc/wireguard/private.key \
+  peer OxlmYnjEPfwVipblGPERvkWTJeORK9PO1MOFVkYll14= \
+  allowed-ips 10.0.0.0/24 \
+  endpoint peer2.example.com:4321
+```
+
+```bash
+# peer can GET by IP
+curl http://10.0.0.2:80
+```
+</div>
+
+<div class="" style="position: absolute; left: 50%; top: NaN%; height: undefined%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+
+<div class="mermaid">
+graph TD
+    A[peer1.example.com:4321] -- tunnel --> B[peer2.example.com:4321]
+    B -- tunnel --> A
+
+</div>
+
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>pros<ul>
+<li>secure infrastructure - always on (with retry, no keepalive needed)</li>
+<li>exposed ports are hardened and challenging to discover</li>
+</ul>
+</li>
+<li>cons<ul>
+<li>no DNS OTS</li>
+<li>peers must be continually exposed (no NAT-T without glue)</li>
+<li>no orchestration OTS: intricate preconfiguration of pubkeys on each node</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+- **Implementing Agent-based Solutions**
+    - Using systemd to run a tunneling agent.
+        - Step-by-step guide.
+        - Key considerations and best practices.
+    - Using Docker to run a tunneling agent.
+        - Step-by-step guide.
+        - Key considerations and best practices.
+- **Implementing Agent-less Solutions**
+    - Examples of Go and Python tunneling libraries.
+        - Overview of popular libraries.
+        - Code snippets and implementation guides.
+        - Use cases and best practices.
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Where Permaculture & FOSS Converge
+
+Sunday 10:00 @Altispeed
+
+*Interested in permaculture design? Explore free & open information sharing, traditional agricultural methods and the technologies we use to monitor production, yields, energy usage and tooling.*
+
+<img src="patch-v-proxy/assets/openag-qr.png" alt="qr|333" style="width: 333px; object-fit: fill">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: style="background-color: rgba(0, 0, 0, 0.5)" class="drop" data-background-image="./patch-v-proxy/assets/microphone.png" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## What's on your mind?
+
+The runner will bring the mic to you
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 0%; top: NaN%; height: undefined%; width: 44%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+## Resources
+
+- **`/r/selfhosted`**
+- Anders Pitman
+	- Awesome Tunneling
+	- IndieBits
+
+</div>
+
+<div class="" style="position: absolute; left: 56%; top: NaN%; height: undefined%; width: 44%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+## Follow Up
+
+**Kenneth Bingham**
+
+w@qrk.us | *@qrkourier*
+
+<img src="patch-v-proxy/assets/linktree-qr.png" alt="qr|333" style="width: 333px; object-fit: fill">
+
+
+</div>
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/menu/menu.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+		  RevealMenu,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+		menu: {
+			loadIcons: false
+		}
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"minScale":0.2,"maxScale":2,"controls":false,"controlsLayout":"edges","progress":false,"slideNumber":false,"loop":true,"autoSlide":0,"transition":"concave","transitionSpeed":"slow","mermaid":{"theme":"dark"}}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
