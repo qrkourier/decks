@@ -15,7 +15,9 @@ minScale: 0.2
 maxScale: 2
 ---
 
-## Patch || Proxy
+%% These slides are published as HTML and Markdown sources in https://qrk.us/pages/projects.html#patch-v-proxy %%
+
+## Patch v. Proxy
 
 *the ins and outs of fortified tunneling*
 
@@ -34,11 +36,15 @@ note:
 
 ## Hello 
 
-:wave:<!-- element class="emoji" -->
+:wave:<!-- element class="emoji fragment fade-in" -->
+
+::: block <!-- element class="fragment fade-in" align="center" -->
 
 **Kenneth Bingham**
 
 w@qrk.us | *@qrkourier*
+
+:::
 
 <style>
 .emoji {
@@ -78,7 +84,7 @@ note:
 
 *network-centric v. app-centric*
 
-<grid drag="33 33" drop="1 -1" bg="black" opacity="50%" align="center"><!-- .element class="grid" -->
+<grid drag="33 33" drop="1 -1" bg="black" opacity="50%" align="center"><!-- .element class="grid fragment fade-in" -->
 
 **VPN**
 
@@ -86,7 +92,7 @@ public gateway to a private subnet or exit node
 
 </grid>
 
-<grid drag="33 33" drop="-1 1" bg="black" opacity="50%" align="center" pad="8">
+<grid drag="33 33" drop="-1 1" bg="black" opacity="50%" align="center" pad="8"><!-- element class="fragment fade-in" -->
 
 **Tunnel**
 
@@ -97,14 +103,15 @@ A public broker or relay for a private application
 note:
 
 - for self-hosters, it's often less about building and bridging infrastructure and more about securing individual apps
-- vpns for full-tunnel exit node, split-tunnel corporate network
+- a bid for freedom from IP addresses
+- vpns for full-tunnel exit node or split-tunnel corporate network
 
 ---
 
 <!-- .slide bg="patch-v-proxy/assets/hand-wrench.png" -->
 
 
-<grid drag="88 33" drop="top" bg="lightblue" opacity="70%" align="center">
+<grid drag="88 33" drop="top" bg="lightblue" opacity="70%" align="center" class="fragment fade-in">
 
 ### Access my own stuff
 
@@ -116,7 +123,7 @@ note:
 
 </grid>
 
-<grid drag="88 33" drop="bottom" bg="lightblue" opacity="70%" align="center">
+<grid drag="88 33" drop="bottom" bg="lightblue" opacity="70%" align="center" class="fragment fade-in">
 
 ### Share my stuff with ppl
 
@@ -158,11 +165,11 @@ note:
 
 ## Production <!-- element id="heading" -->
 
-<grid drag="88 33" drop="bottom" bg="beige" opacity="70%" align="center">
+<grid drag="88 33" drop="bottom" bg="beige" opacity="70%" align="center" class="fragment fade-in">
 
 ::: block <!-- element id="block" -->
 
-> There are as many definitions as there are toothbrushes in the known universe.<!-- element id="quote" -->
+> There are as many standards as there are toothbrushes in the known universe.<!-- element id="quote" -->
 
 :::
 
@@ -417,7 +424,7 @@ graph TD
 </grid>
 
 note:
-
+- data plane for some modern VPNs with coordination planes
 - pros
 	- secure infrastructure - always on (with retry, no keepalive needed)
 	- exposed ports are hardened and challenging to discover
@@ -428,39 +435,193 @@ note:
 
 ---
 
+## Free Overlays
 
-- **Implementing Agent-based Solutions**
-    - Using systemd to run a tunneling agent.
-        - Step-by-step guide.
-        - Key considerations and best practices.
-    - Using Docker to run a tunneling agent.
-        - Step-by-step guide.
-        - Key considerations and best practices.
-- **Implementing Agent-less Solutions**
-    - Examples of Go and Python tunneling libraries.
-        - Overview of popular libraries.
-        - Code snippets and implementation guides.
-        - Use cases and best practices.
+🔘 FOSS controller<br />
+🔘 FOSS data plane<br />
+🔘 FOSS agent or sdk
+
+*a network on a network*
+
+%% ::: block <!-- element style="font-size: 0.9em" --> %%
+
+| project   | layer | transport       | context | default | license  |
+| --------- | ----- | --------------- | ------- | ------- | -------- |
+| ZeroTier  | 2     | custom (C++)    | user    | allow   | BSD-1    |
+| Headscale | 3     | WireGuard-Go    | user    | allow   | BSD-3    |
+| NetBird   | 3     | WireGuard   (C) | kernel  | allow   | BSD-3    |
+| Nebula    | 3     | custom  (Go)    | user    | deny    | MIT      |
+| OpenZiti  | 4     | custom  (C, Go) | user    | deny    | Apache-2 |
 
 
+note:
+
+- before we dive into tunnelers, honorable mention to "overlays"
+	- "overlays" include mesh networks, modern VPNs
+	- you might not need an overlay if you only need to tunnel a few services
+	- overlays as a category are the way to go if you're building a platform, stack, or securing infrastructure...but start with a deny policy
+- escape the IP address paradigm if you can (software-native socket)
+- I have experience hosting OpenZiti if you have questions 
+- I'd say the ones at layer 3 and below are mesh VPNs but I wouldn't call OpenZiti a VPN because it's based on applications, not IP networks
+- the other major differences
+	-  degrees of cloud native controllers and proxies
+	- whether patching in a library is an option
+	- some attempt NAT-T, but there are many caveats like mutual hard NATs and co-located peers behind CGNAT
 
 ---
 
-## Where Permaculture & FOSS Converge
+## Freemium Tunnels
 
-Sunday 10:00 @Altispeed
+*commercial*
 
-*Interested in permaculture design? Explore free & open information sharing, traditional agricultural methods and the technologies we use to monitor production, yields, energy usage and tooling.*
+⚫ FOSS controller<br />
+⚫ FOSS proxy<br />
+🔘 FOSS agent or sdk
 
-![qr|333](patch-v-proxy/assets/openag-qr.png)
+| product                           | public          | public authN | private        | sdk              | license     |
+| --------------------------------- | --------------- | ------------ | -------------- | ---------------- | ----------- |
+| CloudFlare Tunnel                 | tcp, udp, https | 🔘           |                |                  | Apache-2    |
+| ngrok                             | tcp, https, tls | 🔘           |                | Go, Python, Rust | proprietary |
+| Tailscale Funnel, Tailscale Serve | tcp, https      | ⚫           | http, tcp, tls |                  | BSD-3       |
+
+note:
+
+- not free
+- run an agent to form a reverse tunnel to the provider's platform
+- a verifiable TLS cert or TCP port for the service
 
 ---
 
-<!-- .slide bg="./patch-v-proxy/assets/microphone.png" style="background-color: rgba(0, 0, 0, 0.5);"-->
+## Free Tunnels
 
-## What's on your mind?
+*self-hosted*
 
-The runner will bring the mic to you
+🔘 FOSS controller<br />
+🔘 FOSS proxy<br />
+🔘 FOSS agent or sdk
+
+| project                  | public         | public authN | private                    | sdk                    | license          |
+| ------------------------ | -------------- | ------------ | -------------------------- | ---------------------- | ---------------- |
+| frp                      | tcp, udp, http | pw, oauth    |                            |                        | Apache-2         |
+| localtunnel              | tcp            |              |                            | JS, Go, Py, Rust, Java | MIT              |
+| teleport (Gravitational) |                |              | http, ssh, k8s, db, rdp    |                        | Apache-2, AGPL-3 |
+| zrok (NetFoundry)        | http           | pw, oauth    | http, tcp, udp, socks, tun | Go, Python, Node.js    | Apache-2         |
+
+note:
+
+- free and self-hostable
+- 
+
+---
+
+<grid drag="44 44" drop="top">
+
+## Py Patch
+
+*embedded tunnel*
+
+</grid>
+<grid drag="44 44" drop="left">
+
+```python
+import zrok
+```
+```python
+@zrok.decor.zrok(opts=zrok_opts)
+def runServer():
+    from zrok_django_radial_calendar.wsgi \
+	    import application
+    serve(application, port=WAITRESS_PORT)
+```
+
+</grid>
+<grid drag="66 77" drop="right"> 
+
+```mermaid
+graph BT
+    subgraph S[*.zrok.example.com:443,1280,3022]
+        direction RL
+        P[https://django.zrok.example.com]
+        B[zrok]
+    end
+    A[Generic Client] --->|no tunnel| P
+    C[zrok Py SDK:!] --->|tunnel| B
+
+```
+
+</grid>
+<grid drag="22 22" drop="11 -1">
+![qr](patch-v-proxy/assets/radial-server-py.png)
+</grid>
+
+<grid drag="55 22" drop="bottom" style="font-size: 0.7em">
+👈 &nbsp;&nbsp;&nbsp;&nbsp; server.py
+</grid>
+
+
+note:
+- patch is an alternative to proxy
+	- there's no agent, just an SDK listening on the tunnel
+	- SDK does not listen on a TCP port
+	- fewer "moving parts" means it's simpler in some ways
+- HTTP client 
+	- gets valid cert, 
+	- renewed by Caddy or certbot, and 
+	- zrok proxies request to SDK
+---
+
+<grid drag="44 44" drop="top">
+
+## Go Patch
+
+*embedded tunnel*
+
+</grid>
+<grid drag="44 44" drop="left">
+
+```go
+import (
+	"github.com/openziti/zrok/sdk/golang/sdk"
+	"net/http"
+)
+```
+```go
+func main() {
+	conn, err := sdk.NewListener(
+		shr.Token, root)
+	http.HandleFunc("/", helloZrok)
+	http.Serve(conn, nil)
+}
+```
+
+</grid>
+<grid drag="66 77" drop="right"> 
+
+```mermaid
+graph BT
+    subgraph S[*.zrok.example.com:443,1280,3022]
+        direction RL
+        P[https://httpbin.zrok.example.com]
+        B[zrok]
+    end
+    A[Generic Client] --->|no tunnel| P
+    C[zrok Go SDK:!] --->|tunnel| B
+
+```
+
+</grid>
+<grid drag="22 22" drop="11 -1">
+![qr](patch-v-proxy/assets/zrok-go-qr.png)
+</grid>
+
+<grid drag="55 22" drop="bottom" style="font-size: 0.7em">
+👈 &nbsp;&nbsp;&nbsp;&nbsp; main.go
+</grid>
+
+
+note:
+- stripped some of the setup and error handling for brevity
+- full main.go linked in qrcode
 
 ---
 
@@ -486,3 +647,27 @@ w@qrk.us | *@qrkourier*
 ![qr|333](patch-v-proxy/assets/linktree-qr.png)
 
 </grid>
+
+
+
+
+---
+
+## Where Permaculture & FOSS Converge
+
+Sunday 10:00 @Altispeed
+
+*Interested in permaculture design? Explore free & open information sharing, traditional agricultural methods and the technologies we use to monitor production, yields, energy usage and tooling.*
+
+![qr|333](patch-v-proxy/assets/openag-qr.png)
+
+---
+
+<!-- .slide bg="./patch-v-proxy/assets/microphone.png" style="background-color: rgba(0, 0, 0, 0.5);"-->
+
+## What's on your mind?
+
+The runner will bring the mic to you
+
+---
+

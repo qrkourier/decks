@@ -89,7 +89,7 @@
       <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-## Patch || Proxy
+## Patch v. Proxy
 
 *the ins and outs of fortified tunneling*
 </div>
@@ -112,11 +112,19 @@
 
 ## Hello 
 
-👋<!-- .element: class="emoji" -->
+👋<!-- .element: class="emoji fragment fade-in" -->
+
+<div class="block">
+
+<!-- .element: style="display: flex; flex-direction: column; align-items: center; justify-content: center" class="fragment fade-in" align="center" -->
 
 **Kenneth Bingham**
 
 w@qrk.us | *@qrkourier*
+
+</div>
+
+
 
 <style>
 .emoji {
@@ -156,7 +164,7 @@ w@qrk.us | *@qrkourier*
 *network-centric v. app-centric*
 
 <div class="has-dark-background" style="background-color: black; opacity: 50%; position: absolute; left: 1%; top: 66%; height: 33%; width: 33%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
-<!-- .element: class="grid" -->
+<!-- .element: class="grid fragment fade-in" -->
 
 **VPN**
 
@@ -165,7 +173,7 @@ public gateway to a private subnet or exit node
 </div>
 
 <div class="has-dark-background" style="background-color: black; padding: 8; box-sizing: border-box; opacity: 50%; position: absolute; left: 66%; top: 1%; height: 33%; width: 33%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
-
+<!-- .element: class="fragment fade-in" -->
 
 **Tunnel**
 
@@ -176,12 +184,13 @@ A public broker or relay for a private application
 
 <aside class="notes"><ul>
 <li>for self-hosters, it&#39;s often less about building and bridging infrastructure and more about securing individual apps</li>
-<li>vpns for full-tunnel exit node, split-tunnel corporate network</li>
+<li>a bid for freedom from IP addresses</li>
+<li>vpns for full-tunnel exit node or split-tunnel corporate network</li>
 </ul>
 </aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" data-background-image="patch-v-proxy/assets/hand-wrench.png" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-<div class="has-light-background" style="background-color: lightblue; opacity: 70%; position: absolute; left: 6%; top: 0%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+<div class="fragment fade-in has-light-background" style="background-color: lightblue; opacity: 70%; position: absolute; left: 6%; top: 0%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
 
 
 ### Access my own stuff
@@ -195,7 +204,7 @@ A public broker or relay for a private application
 
 </div>
 
-<div class="has-light-background" style="background-color: lightblue; opacity: 70%; position: absolute; left: 6%; top: 67%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+<div class="fragment fade-in has-light-background" style="background-color: lightblue; opacity: 70%; position: absolute; left: 6%; top: 67%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
 
 
 ### Share my stuff with ppl
@@ -254,14 +263,14 @@ A public broker or relay for a private application
 
 ## Production <!-- .element: id="heading" -->
 
-<div class="has-light-background" style="background-color: beige; opacity: 70%; position: absolute; left: 6%; top: 67%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
+<div class="fragment fade-in has-light-background" style="background-color: beige; opacity: 70%; position: absolute; left: 6%; top: 67%; height: 33%; width: 88%; display: flex; flex-direction: column; align-items: center; justify-content: center" align="center">
 
 
 <div class="block">
 
 <!-- .element: id="block" -->
 
-> There are as many definitions as there are toothbrushes in the known universe.<!-- .element: id="quote" -->
+> There are as many standards as there are toothbrushes in the known universe.<!-- .element: id="quote" -->
 
 </div>
 
@@ -580,6 +589,7 @@ graph TD
 </div>
 
 <aside class="notes"><ul>
+<li>data plane for some modern VPNs with coordination planes</li>
 <li>pros<ul>
 <li>secure infrastructure - always on (with retry, no keepalive needed)</li>
 <li>exposed ports are hardened and challenging to discover</li>
@@ -595,35 +605,225 @@ graph TD
 </aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-- **Implementing Agent-based Solutions**
-    - Using systemd to run a tunneling agent.
-        - Step-by-step guide.
-        - Key considerations and best practices.
-    - Using Docker to run a tunneling agent.
-        - Step-by-step guide.
-        - Key considerations and best practices.
-- **Implementing Agent-less Solutions**
-    - Examples of Go and Python tunneling libraries.
-        - Overview of popular libraries.
-        - Code snippets and implementation guides.
-        - Use cases and best practices.
-</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+## Free Overlays
+
+🔘 FOSS controller<br ></br>
+🔘 FOSS data plane<br ></br>
+🔘 FOSS agent or sdk
+
+*a network on a network*
+
+
+
+| project   | layer | transport       | context | default | license  |
+| --------- | ----- | --------------- | ------- | ------- | -------- |
+| ZeroTier  | 2     | custom (C++)    | user    | allow   | BSD-1    |
+| Headscale | 3     | WireGuard-Go    | user    | allow   | BSD-3    |
+| NetBird   | 3     | WireGuard   (C) | kernel  | allow   | BSD-3    |
+| Nebula    | 3     | custom  (Go)    | user    | deny    | MIT      |
+| OpenZiti  | 4     | custom  (C, Go) | user    | deny    | Apache-2 |
+</div>
+
+<aside class="notes"><ul>
+<li>before we dive into tunnelers, honorable mention to &quot;overlays&quot;<ul>
+<li>&quot;overlays&quot; include mesh networks, modern VPNs</li>
+<li>you might not need an overlay if you only need to tunnel a few services</li>
+<li>overlays as a category are the way to go if you&#39;re building a platform, stack, or securing infrastructure...but start with a deny policy</li>
+</ul>
+</li>
+<li>escape the IP address paradigm if you can (software-native socket)</li>
+<li>I have experience hosting OpenZiti if you have questions </li>
+<li>I&#39;d say the ones at layer 3 and below are mesh VPNs but I wouldn&#39;t call OpenZiti a VPN because it&#39;s based on applications, not IP networks</li>
+<li>the other major differences<ul>
+<li>degrees of cloud native controllers and proxies</li>
+<li>whether patching in a library is an option</li>
+<li>some attempt NAT-T, but there are many caveats like mutual hard NATs and co-located peers behind CGNAT</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-## Where Permaculture & FOSS Converge
+## Freemium Tunnels
 
-Sunday 10:00 @Altispeed
+*commercial*
 
-*Interested in permaculture design? Explore free & open information sharing, traditional agricultural methods and the technologies we use to monitor production, yields, energy usage and tooling.*
+⚫ FOSS controller<br ></br>
+⚫ FOSS proxy<br ></br>
+🔘 FOSS agent or sdk
 
-<img src="patch-v-proxy/assets/openag-qr.png" alt="qr|333" style="width: 333px; object-fit: fill">
-</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: style="background-color: rgba(0, 0, 0, 0.5)" class="drop" data-background-image="./patch-v-proxy/assets/microphone.png" -->
+| product                           | public          | public authN | private        | sdk              | license     |
+| --------------------------------- | --------------- | ------------ | -------------- | ---------------- | ----------- |
+| CloudFlare Tunnel                 | tcp, udp, https | 🔘           |                |                  | Apache-2    |
+| ngrok                             | tcp, https, tls | 🔘           |                | Go, Python, Rust | proprietary |
+| Tailscale Funnel, Tailscale Serve | tcp, https      | ⚫           | http, tcp, tls |                  | BSD-3       |
+</div>
+
+<aside class="notes"><ul>
+<li>not free</li>
+<li>run an agent to form a reverse tunnel to the provider&#39;s platform</li>
+<li>a verifiable TLS cert or TCP port for the service</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
-## What's on your mind?
+## Free Tunnels
 
-The runner will bring the mic to you
-</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+*self-hosted*
+
+🔘 FOSS controller<br ></br>
+🔘 FOSS proxy<br ></br>
+🔘 FOSS agent or sdk
+
+| project                  | public         | public authN | private                    | sdk                    | license          |
+| ------------------------ | -------------- | ------------ | -------------------------- | ---------------------- | ---------------- |
+| frp                      | tcp, udp, http | pw, oauth    |                            |                        | Apache-2         |
+| localtunnel              | tcp            |              |                            | JS, Go, Py, Rust, Java | MIT              |
+| teleport (Gravitational) |                |              | http, ssh, k8s, db, rdp    |                        | Apache-2, AGPL-3 |
+| zrok (NetFoundry)        | http           | pw, oauth    | http, tcp, udp, socks, tun | Go, Python, Node.js    | Apache-2         |
+</div>
+
+<aside class="notes"><ul>
+<li>free and self-hostable</li>
+<li></li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 28%; top: 0%; height: 44%; width: 44%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+## Py Patch
+
+*embedded tunnel*
+
+</div>
+<div class="" style="position: absolute; left: 0%; top: 28%; height: 44%; width: 44%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+```python
+import zrok
+```
+```python
+@zrok.decor.zrok(opts=zrok_opts)
+def runServer():
+    from zrok_django_radial_calendar.wsgi \
+	    import application
+    serve(application, port=WAITRESS_PORT)
+```
+
+</div>
+<div class="" style="position: absolute; left: 34%; top: 11.5%; height: 77%; width: 66%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+ 
+
+
+<div class="mermaid">
+graph BT
+    subgraph S[*.zrok.example.com:443,1280,3022]
+        direction RL
+        P[https://django.zrok.example.com]
+        B[zrok]
+    end
+    A[Generic Client] --->|no tunnel| P
+    C[zrok Py SDK:!] --->|tunnel| B
+
+
+</div>
+
+
+</div>
+<div class="" style="position: absolute; left: 11%; top: 77%; height: 22%; width: 22%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<img src="patch-v-proxy/assets/radial-server-py.png" alt="qr" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="font-size: 0.7em; position: absolute; left: 22.5%; top: 78%; height: 22%; width: 55%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+👈 &nbsp;&nbsp;&nbsp;&nbsp; server.py
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>patch is an alternative to proxy<ul>
+<li>there&#39;s no agent, just an SDK listening on the tunnel</li>
+<li>SDK does not listen on a TCP port</li>
+<li>fewer &quot;moving parts&quot; means it&#39;s simpler in some ways</li>
+</ul>
+</li>
+<li>HTTP client <ul>
+<li>gets valid cert, </li>
+<li>renewed by Caddy or certbot, and </li>
+<li>zrok proxies request to SDK</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 28%; top: 0%; height: 44%; width: 44%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+## Go Patch
+
+*embedded tunnel*
+
+</div>
+<div class="" style="position: absolute; left: 0%; top: 28%; height: 44%; width: 44%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+
+```go
+import (
+	"github.com/openziti/zrok/sdk/golang/sdk"
+	"net/http"
+)
+```
+```go
+func main() {
+	conn, err := sdk.NewListener(
+		shr.Token, root)
+	http.HandleFunc("/", helloZrok)
+	http.Serve(conn, nil)
+}
+```
+
+</div>
+<div class="" style="position: absolute; left: 34%; top: 11.5%; height: 77%; width: 66%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+ 
+
+
+<div class="mermaid">
+graph BT
+    subgraph S[*.zrok.example.com:443,1280,3022]
+        direction RL
+        P[https://httpbin.zrok.example.com]
+        B[zrok]
+    end
+    A[Generic Client] --->|no tunnel| P
+    C[zrok Go SDK:!] --->|tunnel| B
+
+
+</div>
+
+
+</div>
+<div class="" style="position: absolute; left: 11%; top: 77%; height: 22%; width: 22%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<img src="patch-v-proxy/assets/zrok-go-qr.png" alt="qr" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="font-size: 0.7em; position: absolute; left: 22.5%; top: 78%; height: 22%; width: 55%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+👈 &nbsp;&nbsp;&nbsp;&nbsp; main.go
+</div>
+</div>
+
+<aside class="notes"><ul>
+<li>stripped some of the setup and error handling for brevity</li>
+<li>full main.go linked in qrcode</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
 <div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
 
 <div class="" style="position: absolute; left: 0%; top: NaN%; height: undefined%; width: 44%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
@@ -651,7 +851,24 @@ w@qrk.us | *@qrkourier*
 
 
 </div>
-</div></script></section></div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Where Permaculture & FOSS Converge
+
+Sunday 10:00 @Altispeed
+
+*Interested in permaculture design? Explore free & open information sharing, traditional agricultural methods and the technologies we use to monitor production, yields, energy usage and tooling.*
+
+<img src="patch-v-proxy/assets/openag-qr.png" alt="qr|333" style="width: 333px; object-fit: fill">
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: style="background-color: rgba(0, 0, 0, 0.5)" class="drop" data-background-image="./patch-v-proxy/assets/microphone.png" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## What's on your mind?
+
+The runner will bring the mic to you
+</div></script></section><section  data-markdown><script type="text/template">
+</script></section></div>
     </div>
 
     <script src="dist/reveal.js"></script>
