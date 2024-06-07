@@ -75,6 +75,7 @@ w@qrk.us | *@qrkourier*
 note:
 
 - Day job is working on the OpenZiti community open-source project. Development is sponsored and led by NetFoundry Cloud
+- personal interest in self-hosting
 
 ---
 
@@ -269,12 +270,12 @@ GatewayPorts clientspecified
 ```bash
 # server tunnel via public host
 $ ssh -nNv \
-    -R '*:8080:web.homelab.internal:80' \
+    -R '*:8080:web.homelab.internal:8080' \
     user@exit.example.com
 ```
 
 ```bash
-# generic client GET web.homelab.internal:80
+# generic client GET web.homelab.internal:8080
 # by public DNS name
 $ curl http://exit.example.com:8080
 ```
@@ -282,12 +283,19 @@ $ curl http://exit.example.com:8080
 </grid>
 <grid drag="50" drop="right">
 
-```mermaid
-graph TD
+```mermaid <!-- element id="ssh-reverse" -->
+graph BT
     A[Generic Client] -->|no tunnel| B[exit.example.com:22,8080]
-    C[web.homelab.internal:80] -->|tunnel| B
+    C[web.homelab.internal:8080] --->|tunnel| B
 ```
 </grid>
+
+<style>
+#ssh-reverse {
+    transform: scale(1.4); /* Adjust the scale factor as needed */
+    transform-origin: top left; /* Adjust the origin as needed */
+}
+</style>
 
 note:
 
@@ -313,12 +321,12 @@ note:
 ```bash
 # client tunnel
 $ ssh -nNv \
-    -L '127.80.80.0:8080:web.homelab.internal:80' \
+    -L '127.80.80.0:8080:web.homelab.internal:8080' \
 	user@exit.example.com
 ```
 
 ```bash
-# same device can GET web.homelab.internal:80 
+# same device can GET web.homelab.internal:8080 
 #  by forward IP:port
 $ curl http://127.80.80.0:8080
 ```
@@ -326,12 +334,19 @@ $ curl http://127.80.80.0:8080
 
 <grid drag="50" drop="right">
 
-```mermaid
+```mermaid <!-- element id="ssh-forward" -->
 graph TD
     A[Tunnel Client] -->|tunnel| B[exit.example.com:22]
-    B -->|no tunnel| C[web.homelab.internal:80]
+    B -->|no tunnel| C[web.homelab.internal:8080]
 ```
 </grid>
+
+<style>
+#ssh-forward {
+    transform: scale(1.4); /* Adjust the scale factor as needed */
+    transform-origin: top left; /* Adjust the origin as needed */
+}
+</style>
 
 note:
 
@@ -360,18 +375,25 @@ ssh -nNvD 1080 user@exit.example.com
 ```
 
 ```bash
-# GET web.homelab.internal:80
+# GET web.homelab.internal:8080
 $ tsocks curl http://web.homelab.internal
 ```
 </grid>
 <grid drag="50" drop="right">
 
-```mermaid
+```mermaid <!-- element id="ssh-dynamic" -->
 graph TD
     A[Tunnel Client] -->|tunnel| B[exit.example.com:22]
-    B -->|no tunnel| C[web.homelab.internal:80]
+    B -->|no tunnel| C[web.homelab.internal:8080]
 ```
 </grid>
+
+<style>
+#ssh-dynamic {
+    transform: scale(1.6); /* Adjust the scale factor as needed */
+    transform-origin: top left; /* Adjust the origin as needed */
+}
+</style>
 
 note:
 
@@ -410,18 +432,28 @@ wg set wg0 \
 
 ```bash
 # peer can GET by IP
-curl http://10.0.0.2:80
+curl http://10.0.0.2:8080
 ```
 </grid>
 
 <grid drag="50" drop="right">
 
-```mermaid
+```mermaid <!-- element id="wireguard" -->
 graph TD
     A[peer1.example.com:4321] -- tunnel --> B[peer2.example.com:4321]
     B -- tunnel --> A
 ```
 </grid>
+
+</grid>
+
+
+<style>
+#wireguard {
+    transform: scale(1.6); /* Adjust the scale factor as needed */
+    transform-origin: top left; /* Adjust the origin as needed */
+}
+</style>
 
 note:
 - data plane for some modern VPNs with coordination planes
@@ -512,6 +544,108 @@ note:
 - free and self-hostable
 - 
 
+
+---
+
+## Public Share
+
+*agent tunnel*
+
+```bash
+zrok share public http://web.homelab.internal:8080
+```
+
+
+```mermaid <!-- element id="zrok-public" -->
+graph BT
+    subgraph S[*.zrok.example.com]
+        direction TB
+        P[https://abcd1234.zrok.example.com]
+        B[zrok]
+    end
+	subgraph H[home server]
+		direction RL
+		C[zrok-share.service] 
+		 W[web.homelab.internal:8080]
+	 end
+
+	A[Generic Client] --->|no tunnel| P
+	C ---->|tunnel| B
+	C --->|no tunnel| W
+
+```
+
+<style>
+#zrok-public {
+    transform: scale(1.8); 
+    transform-origin: top center;
+}
+</style>
+
+note:
+
+---
+
+<grid drag="50 50" drop="top">
+
+## Private Share
+
+</grid>
+
+<grid drag="50 50" drop="left">
+
+```bash
+# server share
+zrok share private http://web.homelab.internal:8080
+```
+
+```bash
+# client
+zrok access private abcd1234
+
+# GET web.homelab.internal:8080
+curl http://127.0.0.1:9090
+```
+
+</grid>
+
+<grid drag="50 50" drop="right">
+
+```mermaid <!-- element id="zrok-private" -->
+graph BT
+    subgraph V[*.zrok.example.com]
+        direction TB
+        Z[zrok]
+    end
+	subgraph H[home server]
+		direction RL
+		S[zrok share private] 
+		W[web.homelab.internal:8080]
+	 end
+	subgraph C[home client]
+		direction BT
+		A[zrok access private] 
+		B[browser]
+	 end
+
+
+	A --->|tunnel| Z
+	B --->|no tunnel| A
+	S --->|no tunnel| W
+	S ---->|tunnel| Z
+
+```
+</grid>
+
+<style>
+#zrok-private {
+    transform: scale(1.8); 
+    transform-origin: top center;
+}
+</style>
+
+note:
+
 ---
 
 <grid drag="44 44" drop="top">
@@ -539,7 +673,7 @@ def runServer():
 
 ```mermaid
 graph BT
-    subgraph S[*.zrok.example.com:443,1280,3022]
+    subgraph S[*.zrok.example.com]
         direction RL
         P[https://django.zrok.example.com]
         B[zrok]
